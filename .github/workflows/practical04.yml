@@ -1,0 +1,20 @@
+name: Practical 04 - Workflow Syntax
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  basic_demo:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Display workflow information
+        run: |
+          echo "Workflow: ${{ github.workflow }}"
+          echo "Event: ${{ github.event_name }}"
+          echo "Job: ${{ github.job }}"
+
+      - name: Display a completion message
+        run: echo "The basic workflow completed successfully."
