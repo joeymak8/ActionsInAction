@@ -1,0 +1,69 @@
+name: Prac5 Expressions and Contexts
+
+on:
+  workflow_dispatch:
+    inputs:
+      simulate_failure:
+        description: "Deliberately fail a step?"
+        required: true
+        default: false
+        type: boolean
+
+permissions:
+  contents: read
+
+env:
+  COURSE: CP5401
+
+jobs:
+  expressions-demo:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Show contexts
+        env:
+          BRANCH_REF: ${{ github.ref }}
+          COMMIT_SHA: ${{ github.sha }}
+          RUNNER_OS: ${{ runner.os }}
+          COURSE_DOT: ${{ env.COURSE }}
+          COURSE_BRACKET: ${{ env['COURSE'] }}
+        run: |
+          echo "Branch: $BRANCH_REF"
+          echo "Commit: $COMMIT_SHA"
+          echo "Runner OS: $RUNNER_OS"
+          echo "Dot syntax: $COURSE_DOT"
+          echo "Bracket syntax: $COURSE_BRACKET"
+
+      - name: Show expression functions
+        run: |
+          echo "contains: ${{ contains('Hello world', 'world') }}"
+          echo "startsWith: ${{ startsWith('Hello world', 'Hello') }}"
+          echo "endsWith: ${{ endsWith('Hello world', 'world') }}"
+          echo "format: ${{ format('Hello {0}', 'CP5401') }}"
+          echo "join: ${{ join(fromJSON('["A","B","C"]'), ', ') }}"
+
+      - name: Run only on main
+        if: ${{ github.ref == 'refs/heads/main' }}
+        run: echo "The current branch is main."
+
+      - name: Run when failure is not requested
+        if: ${{ !inputs.simulate_failure && runner.os == 'Linux' }}
+        run: echo "Normal mode on Linux."
+
+      - name: Deliberate failure
+        if: ${{ inputs.simulate_failure }}
+        run: |
+          echo "This failure is intentional for Prac5."
+          exit 1
+
+      - name: Success handler
+        if: ${{ success() }}
+        run: echo "All previous steps succeeded."
+
+      - name: Failure handler
+        if: ${{ failure() }}
+        run: echo "A previous step failed."
+
+      - name: Always handler
+        if: ${{ always() }}
+        run: echo "This step runs regardless of success or failure."
